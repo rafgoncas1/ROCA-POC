@@ -1,4 +1,6 @@
 from sage.all import *
+import argparse
+from roca_generator import generate_modulus
 
 def solve(M, n, a, m):
     # I need to import it in the function otherwise multiprocessing doesn't find it in its context
@@ -69,18 +71,48 @@ def roca(n):
             if val:
                 p = val[0]
                 q = val[1]
-                print("found factorization:\np={}\nq={}".format(p, q))
+                print("*** SUCCESS: Factorization found ***\np={}\nq={}".format(p, q))
                 return val
-
+def read_modulus(file):
+    with open(file, 'r') as f:
+        n = f.read()
+    return n
 if __name__ == "__main__":
-    # Normal values
-    #p = 88311034938730298582578660387891056695070863074513276159180199367175300923113
-    #q = 122706669547814628745942441166902931145718723658826773278715872626636030375109
-    #a = 551658, interval = [475706, 1076306]
-    # won't find if beta=0.5
-    p = 80688738291820833650844741016523373313635060001251156496219948915457811770063
-    q = 69288134094572876629045028069371975574660226148748274586674507084213286357069
-    #a = 176170, interval = [171312, 771912]
-    n = p*q
+    formats = ['decimal', 'hex', 'base64']
+
+    parser = argparse.ArgumentParser(description='ROCA attack')
+    parser.add_argument('-n', '--modulus', metavar='N', help='RSA modulus')
+    parser.add_argument('-f', '--file', help='File containing the modulus in one line')
+    parser.add_argument('--format', help='Format of the modulus (default: %(default)s)', default='decimal', choices=formats)
+    parser.add_argument('-g', '--generate', metavar='NPRIMES', help='Generate a weak modulus with n primes', type=int)
+
+    #argument to
+    args = parser.parse_args()
+    
+    if args.generate:
+        generate_modulus(args.generate)
+        exit(0)
+
+    if args.file:
+        try:
+            n = read_modulus(args.file)
+        except Exception as e:
+            print("Error while reading the modulus: {}".format(e))
+            exit(1)    
+    elif args.modulus:
+        n = args.modulus
+    else:
+        parser.print_help()
+        exit(1)
+    
+    if args.format == 'hex':
+        n = int(n, 16)
+    elif args.format == 'base64':
+        n = int(n, 64)
+    else:
+        n = int(n)
+
+    print("\n--- Starting ROCA attack ---\n")
+    print("Modulus:\nN= {}\n".format(n))
     # For the test values chosen, a is quite close to the minimal value so the search is not too long
     roca(n)
