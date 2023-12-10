@@ -55,13 +55,13 @@ def generate_modulus(nprimes):
     
     print("\n--- Generating key with [", nprimes, "] primes ---\n")
 
-    a = random.randint(1, 10)
-    k = random.randint(1, 10)
+    a = random.randint(1, 30)
+    k = random.randint(1, 30)
     product_of_primes_val = product_of_primes(nprimes)
     p = k * product_of_primes_val + pow(65537, a, product_of_primes_val)
 
-    a = random.randint(1, 10)
-    k = random.randint(1, 10)
+    a = random.randint(1, 30)
+    k = random.randint(1, 30)
     print("# parameters:\nk=", k, ", a=", a)
     q = k * product_of_primes_val + pow(65537, a, product_of_primes_val)
 
